@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz · Sistemas en Acción</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#d9d9d9; --card:#f3f3f3; --ink:#0a1038; --mute:#3f4468; --line:#b9bbc6;
+  --t1:#0e8c8c; --t2:#3a9139; --t3:#5226a8; --ok:#1d7a3a; --bad:#b3261e;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#10142e;--card:#1a1f42;--ink:#eef0ff;--mute:#aab0d6;--line:#343a6b;--ok:#5fd488;--bad:#ff8a80;color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#10142e;--card:#1a1f42;--ink:#eef0ff;--mute:#aab0d6;--line:#343a6b;--ok:#5fd488;--bad:#ff8a80;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-size:20px;line-height:1.3;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,.big{font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;letter-spacing:.01em;line-height:1.02;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:17px;color:var(--mute);margin-bottom:18px}
+h1{font-size:clamp(44px,12vw,84px);margin-bottom:10px}
+.lead{color:var(--mute);margin:0 0 26px;max-width:46ch}
+.topics{display:grid;gap:14px}
+.topic{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:0;border-top:10px solid var(--c);border-radius:14px;padding:16px 18px 18px;cursor:pointer}
+.topic:hover{outline:2px solid var(--c)}
+.topic .tag{font-size:17px;color:var(--c);font-weight:600}
+.topic h2{font-size:30px;margin:2px 0 6px}
+.topic .meta{display:flex;justify-content:space-between;color:var(--mute);font-size:18px}
+.best{font-weight:600;color:var(--ink)}
+:focus-visible{outline:3px solid var(--c,var(--t3));outline-offset:2px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 20px}
+.bar i{display:block;height:100%;background:var(--c);width:0;transition:width .3s}
+.head{display:flex;justify-content:space-between;color:var(--mute);font-size:18px}
+.q{font-size:clamp(28px,7vw,40px);margin:0 0 18px;font-family:Anton,Impact,sans-serif;font-weight:400;line-height:1.1}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;font-size:21px;text-align:left;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;gap:12px;align-items:flex-start}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:16px}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--card))}
+.fb{margin:16px 0 0;padding:14px 16px;border-left:6px solid var(--c);background:var(--card);border-radius:0 10px 10px 0;color:var(--ink)}
+.fb strong{display:block;margin-bottom:2px}
+.btn{font:inherit;font-weight:600;font-size:21px;border:0;border-radius:12px;padding:12px 22px;background:var(--c);color:#fff;cursor:pointer;margin-top:18px}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);margin-left:8px}
+.score{font-size:clamp(80px,26vw,150px);color:var(--c);margin:8px 0}
+.rev{margin-top:22px;display:grid;gap:8px}
+.rev div{background:var(--card);border-radius:10px;padding:10px 14px;font-size:18px}
+.rev .k{color:var(--ok)} .rev .x{color:var(--bad)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section id="home">
+    <div class="top"><span>E.P.E.T. N°1 · Sistemas II</span></div>
+    <h1>Quiz: Sistemas en Acción</h1>
+    <p class="lead">Elegí un tema de la revista y respondé 4 preguntas. Al final ves tu puntaje y qué repasar.</p>
+    <div class="topics" id="topics"></div>
+  </section>
+  <section id="game" hidden></section>
+</main>
+<script>
+var TOPICS=[
+{id:1,c:"var(--t1)",tag:"Tema 1",name:"Software administrativo hospitalario",qs:[
+ {q:"¿Qué es un software administrativo hospitalario?",o:["Una solución tecnológica integral que centraliza, automatiza y optimiza los procesos administrativos, financieros y operativos de un hospital","Un equipo médico que realiza diagnósticos por imágenes","Una red social para que los pacientes se contacten entre sí","Un programa que solo sirve para imprimir recetas"],e:"Es una solución integral que garantiza la trazabilidad de la información (pág. 4)."},
+ {q:"En Gestión de farmacia, ¿cuál es un dato de ENTRADA?",o:["La orden médica o prescripción","Las alertas de seguridad","El registro de devoluciones","La medicación preparada y dispensada"],e:"La prescripción entra al sistema; las alertas, el registro y la medicación dispensada son datos de salida (pág. 7)."},
+ {q:"¿Cuál de estos software hospitalarios se usa en Argentina?",o:["Alephoo","Epic Systems","Oracle Cerner","Meditech"],e:"Alephoo está adaptado a la normativa y operativa argentina. Los otros tres se mencionan a nivel mundial (págs. 10 y 11)."},
+ {q:"En el diseño de interfaz, el cartel rojo “Error, DNI inexistente” corresponde a la etapa de…",o:["Salida (output)","Entrada (input)","Proceso (process)","Ninguna etapa"],e:"Un mensaje que el sistema muestra al usuario es una salida. El campo para buscar paciente, en cambio, es una entrada (pág. 14)."}
+]},
+{id:2,c:"var(--t2)",tag:"Tema 2",name:"Sistema de riego automatizado",qs:[
+ {q:"¿Qué pasa cuando la humedad del suelo es baja?",o:["El sensor avisa a la placa, que activa la bomba para comenzar el riego","El sistema mantiene la bomba apagada","El sistema espera a que llueva","La placa desactiva el relé y detiene el riego"],e:"Es la condición 1 de riego: la tierra seca activa la bomba (pág. 19)."},
+ {q:"¿Qué hace una electroválvula en el sistema?",o:["Abre o cierra el paso del agua por sector al recibir una señal eléctrica","Mide la humedad del suelo","Filtra las partículas del agua","Almacena el agua y estabiliza el suministro"],e:"Es el componente de control que habilita cada zona de riego (pág. 20)."},
+ {q:"Cuando la temperatura es muy alta, el sistema…",o:["Pospone el riego a una hora más fresca, como la mañana temprano o el atardecer","Riega más seguido al mediodía","Apaga el sistema por una semana","Abre todas las electroválvulas a la vez"],e:"Así se reduce la evaporación del agua (pág. 19)."},
+ {q:"Si el sensor detecta lluvia o poco nivel en el tanque, el controlador…",o:["Suspende el riego","Enciende la bomba al máximo","Abre todas las electroválvulas","Cambia los goteros por aspersores"],e:"Así evita desperdiciar agua y no daña la bomba (pág. 25)."}
+]},
+{id:3,c:"var(--t3)",tag:"Tema 3",name:"Edificios inteligentes",qs:[
+ {q:"¿Qué significa BMS?",o:["Building Management System: sistema de gestión de edificios","Basic Mobile Sensor: sensor móvil básico","Big Memory Storage: almacenamiento de gran memoria","Battery Monitoring Service: servicio de control de baterías"],e:"Es el conjunto de software y equipos que administra todo el edificio (pág. 26)."},
+ {q:"¿Qué componente es el “cerebro” del sistema?",o:["Los controladores","Los sensores","Los actuadores","Las cerraduras"],e:"Reciben la información, la analizan y envían órdenes. Los sensores miden y los actuadores ejecutan (pág. 27)."},
+ {q:"¿Para qué sirve el protocolo BACnet?",o:["Para que equipos de distintas marcas compartan datos y “hablen” entre sí","Para generar electricidad con paneles solares","Para abrir las puertas del edificio con tarjeta","Para conectar los ascensores a internet pública"],e:"BACnet es un estándar global de comunicación (pág. 27)."},
+ {q:"¿Dónde está el Burj Khalifa, el edificio más alto del mundo?",o:["Dubái, Emiratos Árabes Unidos","Shanghái, China","Nueva York, Estados Unidos","Buenos Aires, Argentina"],e:"Es el edificio más alto del mundo (pág. 27)."}
+]}];
+var best={},cur=null,i=0,score=0,log=[];
+var $=function(id){return document.getElementById(id)};
+function home(){
+  $("game").hidden=true;$("home").hidden=false;
+  $("topics").innerHTML=TOPICS.map(function(t){
+    var b=best[t.id];
+    return '<button class="topic" style="--c:'+t.c+'" data-id="'+t.id+'"><span class="tag">'+t.tag+'</span><h2>'+t.name+'</h2><span class="meta"><span>'+t.qs.length+' preguntas</span><span class="best">'+(b!==undefined?'Mejor puntaje: '+b+'/'+t.qs.length:'Sin intentar')+'</span></span></button>';
+  }).join("");
+  document.querySelectorAll(".topic").forEach(function(el){el.onclick=function(){start(+el.dataset.id)}});
+  window.scrollTo(0,0);
+}
+function start(id){cur=TOPICS.filter(function(t){return t.id===id})[0];i=0;score=0;log=[];$("home").hidden=true;$("game").hidden=false;$("game").style.setProperty("--c",cur.c);show()}
+function shuffle(a){for(var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1)),t=a[k];a[k]=a[j];a[j]=t}return a}
+function show(){
+  var q=cur.qs[i],opts=shuffle(q.o.map(function(t,n){return{t:t,ok:n===0}}));
+  $("game").innerHTML='<div class="head"><span>'+cur.tag+' · '+cur.name+'</span><span>'+(i+1)+' de '+cur.qs.length+'</span></div><div class="bar"><i style="width:'+(i/cur.qs.length*100)+'%"></i></div><h2 class="q">'+q.q+'</h2><div class="opts" id="opts"></div><div id="fb"></div>';
+  var box=$("opts");
+  opts.forEach(function(o,n){
+    var b=document.createElement("button");b.className="opt";b.innerHTML='<b>'+"ABCD".charAt(n)+'</b><span>'+o.t+'</span>';
+    b.onclick=function(){answer(b,o,opts)};box.appendChild(b);
+  });
+}
+function answer(btn,o,opts){
+  var q=cur.qs[i],all=document.querySelectorAll(".opt");
+  all.forEach(function(b,n){b.disabled=true;if(opts[n].ok)b.classList.add("right")});
+  if(o.ok){score++}else{btn.classList.add("wrong")}
+  log.push({q:q.q,ok:o.ok,a:q.o[0]});
+  var last=i===cur.qs.length-1;
+  $("fb").innerHTML='<div class="fb" role="status"><strong>'+(o.ok?'¡Correcto!':'Incorrecto')+'</strong>'+q.e+'</div><button class="btn" id="next">'+(last?'Ver resultado':'Siguiente pregunta')+'</button>';
+  $("next").focus();
+  $("next").onclick=function(){last?end():(i++,show())};
+}
+function end(){
+  var n=cur.qs.length;if(best[cur.id]===undefined||score>best[cur.id])best[cur.id]=score;
+  var msg=score===n?"¡Perfecto! Dominás el tema.":score>=n-1?"Muy bien, casi perfecto.":score>=n/2?"Vas bien, repasá lo que fallaste.":"Conviene volver a leer el tema en la revista.";
+  var others=TOPICS.filter(function(t){return best[t.id]===undefined}).length;
+  $("game").innerHTML='<div class="head"><span>'+cur.tag+' · '+cur.name+'</span><span>Resultado</span></div><div class="bar"><i style="width:100%"></i></div><div class="big score">'+score+'/'+n+'</div><h2 class="q">'+msg+'</h2><div class="rev">'+log.map(function(l){return '<div class="'+(l.ok?'k':'x')+'"><strong>'+(l.ok?'Bien: ':'Mal: ')+'</strong>'+l.q+(l.ok?'':'<br>Respuesta correcta: '+l.a)+'</div>'}).join("")+'</div><p class="lead" style="margin-top:18px">'+(others?'Te faltan '+others+' tema(s) por intentar.':'Ya hiciste los tres temas.')+'</p><button class="btn" id="again">Repetir este tema</button><button class="btn ghost" id="back">Elegir otro tema</button>';
+  $("again").onclick=function(){start(cur.id)};$("back").onclick=home;window.scrollTo(0,0);
+}
+home();
+</script>
+</body>
+</html>
